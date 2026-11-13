@@ -1,0 +1,44 @@
+plugins {
+	id 'java'
+}
+
+repositories {
+	mavenLocal()
+	maven {
+		url = 'https://repo.runelite.net'
+		content {
+			includeGroupByRegex("net\\.runelite.*")
+		}
+	}
+	mavenCentral()
+}
+
+def runeLiteVersion = 'latest.release'
+
+dependencies {
+	compileOnly group: 'net.runelite', name: 'client', version: runeLiteVersion
+
+	testImplementation 'junit:junit:4.13.2'
+	testImplementation group: 'net.runelite', name: 'client', version: runeLiteVersion
+	testImplementation group: 'net.runelite', name: 'jshell', version: runeLiteVersion
+}
+
+group = 'com.cleanmirror'
+version = '1.0-SNAPSHOT'
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+	options.release.set(11)
+}
+
+// Local testing: ./gradlew run  (starts RuneLite with Clean Mirror loaded)
+tasks.register('run', JavaExec) {
+	group = 'application'
+	description = 'Launch RuneLite with the Clean Mirror plugin loaded'
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.cleanmirror.CleanMirrorPluginTest'
+	// RuneLite refuses to load dev plugins without assertions (-ea). This makes the dev client
+	// somewhat slower than a normal RuneLite install, so FPS numbers here are pessimistic.
+	jvmArgs '-ea'
+	args '--developer-mode'
+}
