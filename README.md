@@ -21,7 +21,7 @@ The mirror never takes keyboard or mouse focus, ignores all input, and sends not
 | Scale | 1x | 1x, 1.5x, 2x or fit to window. 1x is cheapest. |
 | Smooth scaling | Off | Bilinear instead of pixel-sharp scaling when not at 1x. |
 | Show cursor | On | Draws your mouse cursor in the mirror. |
-| Screenshot hotkey | Not set | Press it while the game is focused to save a PNG of the mirror (the clean frame) to `.runelite/screenshots/Clean Mirror/`. |
+| Screenshot hotkey | Not set | Press it while the game is focused to save a PNG of the mirror (the clean frame) to `.runelite/plugin-data/clean-mirror/screenshots/`. |
 | Cursor in screenshots | Off | Include your cursor in mirror screenshots. |
 | Screenshot chat message | Off | Confirms each screenshot in game chat. Chat is part of the game, so the message also appears in the mirror. |
 
@@ -42,7 +42,7 @@ The mirror never takes keyboard or mouse focus, ignores all input, and sends not
 | Overlay opacity (GPU) | 90 | GPU plugin only; see below. 100 turns it off. |
 | Clean inventory overlays | On | Also removes overlays on the inventory, such as inventory tags. |
 | Show performance stats | Off | Shows game FPS, mirror FPS and per-frame cost in the mirror's title bar. |
-| Save debug frame | Off | Saves the next frame (original and clean PNGs plus a log) to `.runelite/clean-mirror/`, then turns itself off. |
+| Save debug frame | Off | Saves the next frame (original and clean PNGs plus a log) to `.runelite/plugin-data/clean-mirror/debug/`, then turns itself off. |
 
 ## How it works
 

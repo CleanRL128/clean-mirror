@@ -6,10 +6,8 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +27,6 @@ import net.runelite.api.Client;
 import net.runelite.api.Point;
 import net.runelite.api.events.BeforeRender;
 import net.runelite.api.widgets.Widget;
-import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneLiteConfig;
@@ -44,12 +41,14 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxOverlay;
+import net.runelite.client.util.Filepath;
 import net.runelite.client.util.HotkeyListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @PluginDescriptor(
 	name = "Clean Mirror",
+	internalName = "clean-mirror",
 	description = "View-only second window showing the game without plugin overlays, for clean recordings",
 	tags = {"record", "recording", "stream", "obs", "video", "clean", "mirror", "content"}
 )
@@ -849,30 +848,37 @@ public class CleanMirrorPlugin extends Plugin
 		}
 		executor.execute(() ->
 		{
-			File dir = new File(new File(RuneLite.RUNELITE_DIR, "screenshots"), "Clean Mirror");
-			if (!dir.exists() && !dir.mkdirs())
-			{
-				log.warn("Could not create {}", dir);
-				return;
-			}
 			String stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
-			File file = new File(dir, "Clean Mirror " + stamp + ".png");
-			for (int n = 2; file.exists(); n++)
-			{
-				file = new File(dir, "Clean Mirror " + stamp + " (" + n + ").png");
-			}
 			try
 			{
-				ImageIO.write(image, "png", file);
+				Filepath dir = getPluginDirectory().join("screenshots");
+				dir.createDirectories();
+				Filepath file = dir.joinSegment("Clean Mirror " + stamp + ".png");
+				for (int n = 2; file.exists(); n++)
+				{
+					file = dir.joinSegment("Clean Mirror " + stamp + " (" + n + ").png");
+				}
+				writePng(image, file);
 				log.debug("Clean Mirror screenshot saved to {}", file);
-				screenshotMessage("Clean Mirror screenshot saved: " + file.getName());
+				screenshotMessage("Clean Mirror screenshot saved: " + file.getFileName());
 			}
-			catch (IOException e)
+			catch (IOException | IllegalArgumentException e)
 			{
 				log.warn("Could not save Clean Mirror screenshot", e);
 				screenshotMessage("Clean Mirror: could not save the screenshot.");
 			}
 		});
+	}
+
+	private static void writePng(BufferedImage image, Filepath file) throws IOException
+	{
+		try (OutputStream out = file.openOutputStream())
+		{
+			if (!ImageIO.write(image, "png", out))
+			{
+				throw new IOException("No PNG writer available");
+			}
+		}
 	}
 
 	private void screenshotMessage(String text)
@@ -892,26 +898,22 @@ public class CleanMirrorPlugin extends Plugin
 		configManager.setConfiguration(CleanMirrorConfig.GROUP, CleanMirrorConfig.KEY_SAVE_DEBUG_FRAME, false);
 		executor.execute(() ->
 		{
-			File dir = new File(RuneLite.RUNELITE_DIR, "clean-mirror");
-			if (!dir.exists() && !dir.mkdirs())
-			{
-				log.warn("Could not create {}", dir);
-				return;
-			}
 			String stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 			try
 			{
-				ImageIO.write(toImage(original, ow, oh, BufferedImage.TYPE_INT_RGB), "png", new File(dir, stamp + "-original.png"));
-				ImageIO.write(toImage(clean, cw, ch, BufferedImage.TYPE_INT_RGB), "png", new File(dir, stamp + "-clean.png"));
+				Filepath dir = getPluginDirectory().join("debug");
+				dir.createDirectories();
+				writePng(toImage(original, ow, oh, BufferedImage.TYPE_INT_RGB), dir.joinSegment(stamp + "-original.png"));
+				writePng(toImage(clean, cw, ch, BufferedImage.TYPE_INT_RGB), dir.joinSegment(stamp + "-clean.png"));
 				if (uiArgb != null)
 				{
-					ImageIO.write(toImage(uiArgb, cw, ch, BufferedImage.TYPE_INT_ARGB), "png", new File(dir, stamp + "-ui-layer.png"));
-					ImageIO.write(toImage(cleanUiArgb, cw, ch, BufferedImage.TYPE_INT_ARGB), "png", new File(dir, stamp + "-ui-layer-clean.png"));
+					writePng(toImage(uiArgb, cw, ch, BufferedImage.TYPE_INT_ARGB), dir.joinSegment(stamp + "-ui-layer.png"));
+					writePng(toImage(cleanUiArgb, cw, ch, BufferedImage.TYPE_INT_ARGB), dir.joinSegment(stamp + "-ui-layer-clean.png"));
 				}
-				Files.write(new File(dir, stamp + "-log.txt").toPath(), snapshotLog.getBytes(StandardCharsets.UTF_8));
+				dir.joinSegment(stamp + "-log.txt").write(snapshotLog);
 				log.info("Clean Mirror debug frame saved to {}", dir);
 			}
-			catch (IOException e)
+			catch (IOException | IllegalArgumentException e)
 			{
 				log.warn("Could not save Clean Mirror debug frame", e);
 			}

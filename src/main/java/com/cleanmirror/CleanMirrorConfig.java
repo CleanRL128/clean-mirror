@@ -106,7 +106,7 @@ public interface CleanMirrorConfig extends Config
 		keyName = "screenshotHotkey",
 		name = "Screenshot hotkey",
 		description = "Press this while the game is focused to save a screenshot of the mirror "
-			+ "(the clean frame) to .runelite/screenshots/Clean Mirror",
+			+ "(the clean frame) to .runelite/plugin-data/clean-mirror/screenshots",
 		section = windowSection
 	)
 	default Keybind screenshotHotkey()
@@ -248,7 +248,7 @@ public interface CleanMirrorConfig extends Config
 		position = 3,
 		keyName = KEY_SAVE_DEBUG_FRAME,
 		name = "Save debug frame",
-		description = "Saves the next frame (original and clean) plus a snapshot log to .runelite/clean-mirror, "
+		description = "Saves the next frame (original and clean) plus a snapshot log to .runelite/plugin-data/clean-mirror/debug, "
 			+ "then switches itself off",
 		section = advancedSection
 	)
