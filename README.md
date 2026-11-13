@@ -64,18 +64,3 @@ So that this is exact, plugin overlays in the 3D view are drawn at **90% opacity
 ## Limitations
 
 - Plugins that change the game itself, rather than drawing on top of it, can't be undone. Examples: chat recolours and timestamps, right-click menu recolours and swaps, entity hiding, interface rearranging.
-- A faint trace can remain where an overlay sits under a translucent interface, such as the transparent chatbox in resizable mode.
-- Overlays attached to interfaces other than the inventory may still appear.
-- Very rarely, a pixel is restored wrongly when the game draws the exact same colour over an overlay pixel. This can leave a stray pixel, for example in the right-click menu.
-- The cursor is drawn as a standard arrow, not the game's cursor.
-
-## Building and running locally
-
-Requires JDK 11 or newer.
-
-```
-./gradlew run       # starts RuneLite (developer mode) with Clean Mirror loaded
-./gradlew test      # runs the unit tests
-```
-
-The development client runs with Java assertions on, which RuneLite requires for loading plugins in development. That makes it somewhat slower than a normal RuneLite install.
